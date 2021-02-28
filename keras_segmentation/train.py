@@ -53,7 +53,7 @@ def Diceloss(gt,pr,smooth = 1e-6):
     inputs = K.flatten(gt)
     targets = K.flatten(pr)
     
-    intersection = K.sum(K.dot(targets, inputs))
+    intersection = K.sum(K.Multiply()([targets, inputs]))
     dice = (2*intersection + smooth) / (K.sum(targets) + K.sum(inputs) + smooth)
 
     
