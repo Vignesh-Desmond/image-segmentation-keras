@@ -55,14 +55,7 @@ def Diceloss(gt,pr,smooth = 1e-6):
     
     intersection = K.sum(K.dot(targets, inputs))
     dice = (2*intersection + smooth) / (K.sum(targets) + K.sum(inputs) + smooth)
-    
-    
-    ##Masked categorical crossentropy
-    
-  '''
-    mask = 1 - gt[:, :, 0]
-    mcce = categorical_crossentropy(gt, pr) * mask
-    '''
+
     
     return 1-dice
 
