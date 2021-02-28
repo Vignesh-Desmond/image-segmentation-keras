@@ -48,27 +48,6 @@ def masked_categorical_crossentropy(gt, pr):
     return categorical_crossentropy(gt, pr) * mask
 
 
-def Diceloss(gt,pr):
-    y_true = gt
-    y_pred = pr
-    
-    alpha = 0.5
-    beta  = 0.5
-    
-    ones = K.ones(K.shape(y_true))
-    p0 = y_pred      # proba that voxels are class i
-    p1 = ones-y_pred # proba that voxels are not class i
-    g0 = y_true
-    g1 = ones-y_true
-    
-    num = K.sum(p0*g0, (0,1,2))
-    den = num + alpha*K.sum(p0*g1,(0,1,2)) + beta*K.sum(p1*g0,(0,1,2))
-    
-    T = K.sum(num/den) # when summing over classes, T has dynamic range [0 Ncl]
-    
-    Ncl = K.cast(K.shape(y_true)[-1], 'float32')
-    return Ncl-T
-
 
 
 class CheckpointsCallback(Callback):
@@ -137,7 +116,7 @@ def train(model,
     if optimizer_name is not None:
         
         if customloss:
-            loss_k = Diceloss
+            loss_k = 'Hinge'
 
         elif ignore_zero_class:
             loss_k = masked_categorical_crossentropy
