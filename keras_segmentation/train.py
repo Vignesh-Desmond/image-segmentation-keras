@@ -48,9 +48,7 @@ def masked_categorical_crossentropy(gt, pr):
     return categorical_crossentropy(gt, pr) * mask
 
 
-def Customloss(gt,pr,smooth = 1e-6):
-    from keras.losses import categorical_crossentropy
-    ##Dice loss
+def Diceloss(gt,pr,smooth = 1e-6):
     
     inputs = K.flatten(gt)
     targets = K.flatten(pr)
@@ -60,12 +58,13 @@ def Customloss(gt,pr,smooth = 1e-6):
     
     
     ##Masked categorical crossentropy
-  
+    
+  '''
     mask = 1 - gt[:, :, 0]
     mcce = categorical_crossentropy(gt, pr) * mask
+    '''
     
-    
-    return 0.6*dice + 0.4*mcce
+    return 1-dice
 
 
 class CheckpointsCallback(Callback):
@@ -134,7 +133,7 @@ def train(model,
     if optimizer_name is not None:
         
         if customloss:
-            loss_k = Customloss
+            loss_k = Diceloss
 
         elif ignore_zero_class:
             loss_k = masked_categorical_crossentropy
