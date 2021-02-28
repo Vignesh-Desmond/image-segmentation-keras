@@ -9,6 +9,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 import tensorflow as tf
 import glob
 import sys
+import keras.backend as K
 
 def find_latest_checkpoint(checkpoints_path, fail_safe=True):
     latest_epoch_checkpoint = tf.train.latest_checkpoint(os.path.dirname(checkpoints_path))
@@ -47,6 +48,26 @@ def masked_categorical_crossentropy(gt, pr):
     return categorical_crossentropy(gt, pr) * mask
 
 
+def Customloss(gt,pr,smooth = 1e-6):
+    from keras.losses import categorical_crossentropy
+    ##Dice loss
+    
+    inputs = K.flatten(gt)
+    targets = K.flatten(pr)
+    
+    intersection = K.sum(K.dot(targets, inputs))
+    dice = (2*intersection + smooth) / (K.sum(targets) + K.sum(inputs) + smooth)
+    
+    
+    ##Masked categorical crossentropy
+  
+    mask = 1 - gt[:, :, 0]
+    mcce = categorical_crossentropy(gt, pr) * mask
+    
+    
+    return 0.6*dice + 0.4*mcce
+
+
 class CheckpointsCallback(Callback):
     def __init__(self, checkpoints_path):
         self.checkpoints_path = checkpoints_path
@@ -81,6 +102,7 @@ def train(model,
           do_augment=False,
           augmentation_name="aug_all",
           callbacks=None,
+          customloss=False,
           custom_augmentation=None,
           other_inputs_paths=None,
           preprocessing=None,
@@ -110,9 +132,13 @@ def train(model,
         assert val_annotations is not None
 
     if optimizer_name is not None:
+        
+        if customloss:
+            loss_k = Customloss
 
-        if ignore_zero_class:
+        elif ignore_zero_class:
             loss_k = masked_categorical_crossentropy
+            
         else:
             loss_k = 'categorical_crossentropy'
 
