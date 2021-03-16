@@ -58,7 +58,22 @@ def weighted_categorical_crossentropy(y_true, y_pred):
     
     return K.categorical_crossentropy(y_true, y_pred) * K.sum(y_true * Kweights, axis=-1)
     
+def generalized_dice_coefficient(y_true, y_pred):
+    smooth = 1.
+    y_true_f = K.flatten(y_true)
+    y_pred_f = K.flatten(y_pred)
+    intersection = K.sum(y_true_f * y_pred_f)
+    score = (2. * intersection + smooth) / (
+                K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+    return score
+   
 
+def dice_loss(y_true, y_pred):
+    loss = 1 - generalized_dice_coefficient(y_true, y_pred)
+    return loss
+
+    
+   
 
 class CheckpointsCallback(Callback):
     def __init__(self, checkpoints_path):
@@ -129,7 +144,8 @@ def train(model,
             loss_k = 'Hinge'
 
         elif ignore_zero_class:
-            loss_k = masked_categorical_crossentropy
+            
+            loss_k = dice_loss
             
         else:
             
