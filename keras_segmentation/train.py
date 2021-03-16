@@ -48,14 +48,16 @@ def masked_categorical_crossentropy(gt, pr):
     return categorical_crossentropy(gt, pr) * mask
 
 
-def weighted_categorical_crossentropy(weights):
-    # weights = [0.9,0.05,0.04,0.01]
-    def wcce(y_true, y_pred):
-        Kweights = K.constant(weights)
-        if not K.is_keras_tensor(y_pred): y_pred = K.constant(y_pred)
-        y_true = K.cast(y_true, y_pred.dtype)
-        return K.categorical_crossentropy(y_true, y_pred) * K.sum(y_true * Kweights, axis=-1)
-    return wcce
+def weighted_categorical_crossentropy(y_true, y_pred):
+    
+    weights = [0.05,0.05,0.18,0.18,0.18,0.18,0.18]
+    Kweights = K.constant(weights)
+    
+    #if not K.is_keras_tensor(y_pred): y_pred = K.constant(y_pred)
+    y_true = K.cast(y_true, y_pred.dtype)
+    
+    return K.categorical_crossentropy(y_true, y_pred) * K.sum(y_true * Kweights, axis=-1)
+    
 
 
 class CheckpointsCallback(Callback):
@@ -130,8 +132,8 @@ def train(model,
             loss_k = masked_categorical_crossentropy
             
         else:
-            weights = [0.05,0.05,0.18,0.18,0.18,0.18,0.18]
-            loss_k = weighted_categorical_crossentropy(weights)
+            
+            loss_k = weighted_categorical_crossentropy
 
         model.compile(loss=loss_k,
                       optimizer=optimizer_name,
