@@ -50,7 +50,7 @@ def masked_categorical_crossentropy(gt, pr):
 
 def weighted_categorical_crossentropy(y_true, y_pred):
     
-    weights = [0.068,0.065,0.2957,0.2149,0.2213,0.046,0.09]
+    weights = [0.0001,0.0005,0.19988,0.19988,0.19988,0.19988,0.19988]
     Kweights = K.constant(weights)
     
     #if not tf.keras.backend.is_keras_tensor(y_pred): 
