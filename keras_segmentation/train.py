@@ -42,6 +42,23 @@ def find_latest_checkpoint(checkpoints_path, fail_safe=True):
 
     return latest_epoch_checkpoint
 
+
+def tversky_index(y_true, y_pred):
+    y_true_pos = K.flatten(y_true)
+    y_pred_pos = K.flatten(y_pred)
+    true_pos = K.sum(y_true_pos * y_pred_pos)
+    false_neg = K.sum(y_true_pos * (1 - y_pred_pos))
+    false_pos = K.sum((1 - y_true_pos) * y_pred_pos)
+    alpha = 0.7
+    smooth = 1
+    return (true_pos + smooth) / (true_pos + alpha * false_neg + (
+                1 - alpha) * false_pos + smooth)
+
+def focal_tversky(y_true, y_pred):
+    pt_1 = tversky_index(y_true, y_pred)
+    gamma = 0.75
+    return K.pow((1 - pt_1), gamma)
+
 def masked_categorical_crossentropy(gt, pr):
     from keras.losses import categorical_crossentropy
     mask = 1 - gt[:, :, 0]
@@ -143,7 +160,7 @@ def train(model,
     if optimizer_name is not None:
         
         if customloss:
-            loss_k = 'Hinge'
+            loss_k = focal_tversky
 
         elif ignore_zero_class:
             
