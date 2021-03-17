@@ -53,8 +53,8 @@ def weighted_categorical_crossentropy(y_true, y_pred):
     weights = [0.068,0.065,0.2957,0.2149,0.2213,0.046,0.09]
     Kweights = K.constant(weights)
     
-    if not tf.keras.backend.is_keras_tensor(y_pred): 
-        y_pred = K.constant(y_pred)
+    #if not tf.keras.backend.is_keras_tensor(y_pred): 
+        #y_pred = K.constant(y_pred)
          
     y_true = K.cast(y_true, y_pred.dtype)
     
