@@ -124,6 +124,7 @@ def train(model,
           val_steps_per_epoch=512,
           gen_use_multiprocessing=False,
           ignore_zero_class=False,
+          diceloss=False
           optimizer_name='adam',
           do_augment=False,
           augmentation_name="aug_all",
@@ -163,6 +164,10 @@ def train(model,
             loss_k = focal_tversky
 
         elif ignore_zero_class:
+            
+            loss_k = masked_categorical_crossentropy
+            
+        elif diceloss:
             
             loss_k = dice_loss
             
