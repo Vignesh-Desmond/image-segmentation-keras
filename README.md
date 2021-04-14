@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/keras-segmentation.svg)](https://badge.fury.io/py/keras-segmentation)
 [![Downloads](https://pepy.tech/badge/keras-segmentation)](https://pepy.tech/project/keras-segmentation)
 [![Build Status](https://travis-ci.org/divamgupta/image-segmentation-keras.png)](https://travis-ci.org/divamgupta/image-segmentation-keras)
-[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 [![Twitter](https://img.shields.io/twitter/url.svg?label=Follow%20%40divamgupta&style=social&url=https%3A%2F%2Ftwitter.com%2Fdivamgupta)](https://twitter.com/divamgupta)
 
 
@@ -85,14 +85,15 @@ pip install opencv-python
 
 Install the module
 
-```shell
-pip install keras-segmentation
-```
-
-or 
-
+Recommended way:
 ```shell
 pip install --upgrade git+https://github.com/divamgupta/image-segmentation-keras
+```
+
+### or 
+
+```shell
+pip install keras-segmentation
 ```
 
 ### or
@@ -299,6 +300,29 @@ new_model.train(
 
 
 ```
+
+
+
+## Knowledge distillation for compressing the model
+
+The following example shows transfer the knowledge from a larger ( and more accurate ) model to a smaller model. In most cases the smaller model trained via knowledge distilation is more accurate compared to the same model trained using vanilla supervised learning. 
+
+```python
+from keras_segmentation.predict import model_from_checkpoint_path
+from keras_segmentation.models.unet import unet_mini
+from keras_segmentation.model_compression import perform_distilation
+
+model_large = model_from_checkpoint_path( "/checkpoints/path/of/trained/model" )
+model_small = unet_mini( n_classes=51, input_height=300, input_width=400  )
+
+perform_distilation ( data_path="/path/to/large_image_set/" , checkpoints_path="path/to/save/checkpoints" , 
+    teacher_model=model_large ,  student_model=model_small  , distilation_loss='kl' , feats_distilation_loss='pa' )
+
+```
+
+
+
+
 
 ## Adding custom augmentation function to training
 
