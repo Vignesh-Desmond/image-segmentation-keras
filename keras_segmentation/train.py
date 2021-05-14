@@ -123,13 +123,13 @@ def train(model,
           steps_per_epoch=512,
           val_steps_per_epoch=512,
           gen_use_multiprocessing=False,
-          ignore_zero_class=False,
-          diceloss=False,
+          masked=False,
+          dice=False,
           optimizer_name='adam',
           do_augment=False,
           augmentation_name="aug_all",
           callbacks=None,
-          customloss=False,
+          focal=False,
           custom_augmentation=None,
           other_inputs_paths=None,
           preprocessing=None,
@@ -160,14 +160,14 @@ def train(model,
 
     if optimizer_name is not None:
         
-        if customloss:
+        if focal:
             loss_k = focal_tversky
 
-        elif ignore_zero_class:
+        elif masked:
             
             loss_k = masked_categorical_crossentropy
             
-        elif diceloss:
+        elif dice:
             
             loss_k = dice_loss
             
