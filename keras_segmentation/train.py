@@ -182,12 +182,12 @@ def train(model,
                 model.compile(loss=loss_k,
                               optimizer=optimizer_name,
                               metrics=['accuracy'])
-     else:
-           n_classes = model.n_classes
-           input_height = model.input_height
-           input_width = model.input_width
-           output_height = model.output_height
-           output_width = model.output_width
+    else:
+        n_classes = model.n_classes
+        input_height = model.input_height
+        input_width = model.input_width
+        output_height = model.output_height
+        output_width = model.output_width
 
         if validate:
             assert val_images is not None
@@ -197,22 +197,22 @@ def train(model,
 
             if focal:
                 loss_k = focal_tversky
-
+    
             elif masked:
 
                 loss_k = masked_categorical_crossentropy
 
             elif dice:
 
-                loss_k = dice_loss
+                 loss_k = dice_loss
 
             else:
 
-                loss_k = weighted_categorical_crossentropy
+                 loss_k = weighted_categorical_crossentropy
 
-            model.compile(loss=loss_k,
-                          optimizer=optimizer_name,
-                          metrics=['accuracy'])
+model.compile(loss=loss_k,
+              optimizer=optimizer_name,
+              metrics=['accuracy'])
 
             
     if checkpoints_path is not None:
