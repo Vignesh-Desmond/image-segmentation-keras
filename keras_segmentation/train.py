@@ -134,8 +134,8 @@ def train(model,
           other_inputs_paths=None,
           preprocessing=None,
           read_image_type=1,
-          want_tpu=False,
-          tpu_strategy=None  # cv2.IMREAD_COLOR = 1 (rgb),
+          want_tpu=False
+           # cv2.IMREAD_COLOR = 1 (rgb),
                              # cv2.IMREAD_GRAYSCALE = 0,
                              # cv2.IMREAD_UNCHANGED = -1 (4 channels like RGBA)
          ):
@@ -145,10 +145,10 @@ def train(model,
         # create the model from the name
         assert (n_classes is not None), "Please provide the n_classes"
         if (input_height is not None) and (input_width is not None):
-            model = model_from_name[model](
+            model,tpu_strategy = model_from_name[model](
                 n_classes, input_height=input_height, input_width=input_width)
         else:
-            model = model_from_name[model](n_classes)
+            model,tpu_strategy = model_from_name[model](n_classes)
             
     if want_tpu:
             n_classes = model.n_classes
@@ -179,7 +179,7 @@ def train(model,
                     loss_k = weighted_categorical_crossentropy
         
             with tpu_strategy.scope():
-                     model = model
+          
                      model.compile(loss=loss_k,
                                     optimizer=optimizer_name,
                                             metrics=['accuracy'])
