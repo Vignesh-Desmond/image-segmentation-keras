@@ -133,7 +133,9 @@ def train(model,
           custom_augmentation=None,
           other_inputs_paths=None,
           preprocessing=None,
-          read_image_type=1  # cv2.IMREAD_COLOR = 1 (rgb),
+          read_image_type=1,
+          want_tpu=False,
+          tpu_strategy=None  # cv2.IMREAD_COLOR = 1 (rgb),
                              # cv2.IMREAD_GRAYSCALE = 0,
                              # cv2.IMREAD_UNCHANGED = -1 (4 channels like RGBA)
          ):
@@ -147,38 +149,72 @@ def train(model,
                 n_classes, input_height=input_height, input_width=input_width)
         else:
             model = model_from_name[model](n_classes)
-
-    n_classes = model.n_classes
-    input_height = model.input_height
-    input_width = model.input_width
-    output_height = model.output_height
-    output_width = model.output_width
-
-    if validate:
-        assert val_images is not None
-        assert val_annotations is not None
-
-    if optimizer_name is not None:
-        
-        if focal:
-            loss_k = focal_tversky
-
-        elif masked:
             
-            loss_k = masked_categorical_crossentropy
-            
-        elif dice:
-            
-            loss_k = dice_loss
-            
-        else:
-            
-            loss_k = weighted_categorical_crossentropy
+    if want_tpu:
+        with tpu_strategy.scope():
+            n_classes = model.n_classes
+            input_height = model.input_height
+            input_width = model.input_width
+            output_height = model.output_height
+            output_width = model.output_width
 
-        model.compile(loss=loss_k,
-                      optimizer=optimizer_name,
-                      metrics=['accuracy'])
+            if validate:
+                assert val_images is not None
+                assert val_annotations is not None
 
+            if optimizer_name is not None:
+
+                if focal:
+                    loss_k = focal_tversky
+
+                elif masked:
+
+                    loss_k = masked_categorical_crossentropy
+
+                elif dice:
+
+                    loss_k = dice_loss
+
+                else:
+
+                    loss_k = weighted_categorical_crossentropy
+
+                model.compile(loss=loss_k,
+                              optimizer=optimizer_name,
+                              metrics=['accuracy'])
+     else:
+           n_classes = model.n_classes
+           input_height = model.input_height
+           input_width = model.input_width
+           output_height = model.output_height
+           output_width = model.output_width
+
+        if validate:
+            assert val_images is not None
+            assert val_annotations is not None
+
+        if optimizer_name is not None:
+
+            if focal:
+                loss_k = focal_tversky
+
+            elif masked:
+
+                loss_k = masked_categorical_crossentropy
+
+            elif dice:
+
+                loss_k = dice_loss
+
+            else:
+
+                loss_k = weighted_categorical_crossentropy
+
+            model.compile(loss=loss_k,
+                          optimizer=optimizer_name,
+                          metrics=['accuracy'])
+
+            
     if checkpoints_path is not None:
         config_file = checkpoints_path + "_config.json"
         dir_name = os.path.dirname(config_file)
