@@ -151,7 +151,6 @@ def train(model,
             model = model_from_name[model](n_classes)
             
     if want_tpu:
-        with tpu_strategy.scope():
             n_classes = model.n_classes
             input_height = model.input_height
             input_width = model.input_width
@@ -178,10 +177,13 @@ def train(model,
                 else:
 
                     loss_k = weighted_categorical_crossentropy
+        
+            with tpu_strategy.scope():
+                     model = model
+                     model.compile(loss=loss_k,
+                                    optimizer=optimizer_name,
+                                            metrics=['accuracy'])
 
-                model.compile(loss=loss_k,
-                              optimizer=optimizer_name,
-                              metrics=['accuracy'])
     else:
         n_classes = model.n_classes
         input_height = model.input_height
