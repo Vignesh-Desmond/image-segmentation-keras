@@ -48,49 +48,50 @@ def crop(o1, o2, i):
     return o1, o2
 
 
-def fcn_8(n_classes, encoder=vanilla_encoder, input_height=416,
+def fcn_8(n_classes,tpu_strategy=None,encoder=vanilla_encoder, input_height=416,
           input_width=608, channels=3):
+    with tpu_strategy.scope():
 
-    img_input, levels = encoder(
-        input_height=input_height,  input_width=input_width, channels=channels)
-    [f1, f2, f3, f4, f5] = levels
+        img_input, levels = encoder(
+            input_height=input_height,  input_width=input_width, channels=channels)
+        [f1, f2, f3, f4, f5] = levels
 
-    o = f5
+        o = f5
 
-    o = (Conv2D(4096, (7, 7), activation='relu',
-                padding='same', data_format=IMAGE_ORDERING))(o)
-    o = Dropout(0.5)(o)
-    o = (Conv2D(4096, (1, 1), activation='relu',
-                padding='same', data_format=IMAGE_ORDERING))(o)
-    o = Dropout(0.5)(o)
+        o = (Conv2D(4096, (7, 7), activation='relu',
+                    padding='same', data_format=IMAGE_ORDERING))(o)
+        o = Dropout(0.5)(o)
+        o = (Conv2D(4096, (1, 1), activation='relu',
+                    padding='same', data_format=IMAGE_ORDERING))(o)
+        o = Dropout(0.5)(o)
 
-    o = (Conv2D(n_classes,  (1, 1), kernel_initializer='he_normal',
-                data_format=IMAGE_ORDERING))(o)
-    o = Conv2DTranspose(n_classes, kernel_size=(4, 4),  strides=(
-        2, 2), use_bias=False, data_format=IMAGE_ORDERING)(o)
+        o = (Conv2D(n_classes,  (1, 1), kernel_initializer='he_normal',
+                    data_format=IMAGE_ORDERING))(o)
+        o = Conv2DTranspose(n_classes, kernel_size=(4, 4),  strides=(
+            2, 2), use_bias=False, data_format=IMAGE_ORDERING)(o)
 
-    o2 = f4
-    o2 = (Conv2D(n_classes,  (1, 1), kernel_initializer='he_normal',
-                 data_format=IMAGE_ORDERING))(o2)
+        o2 = f4
+        o2 = (Conv2D(n_classes,  (1, 1), kernel_initializer='he_normal',
+                     data_format=IMAGE_ORDERING))(o2)
 
-    o, o2 = crop(o, o2, img_input)
+        o, o2 = crop(o, o2, img_input)
 
-    o = Add()([o, o2])
+        o = Add()([o, o2])
 
-    o = Conv2DTranspose(n_classes, kernel_size=(4, 4),  strides=(
-        2, 2), use_bias=False, data_format=IMAGE_ORDERING)(o)
-    o2 = f3
-    o2 = (Conv2D(n_classes,  (1, 1), kernel_initializer='he_normal',
-                 data_format=IMAGE_ORDERING))(o2)
-    o2, o = crop(o2, o, img_input)
-    o = Add( name="seg_feats" )([o2, o])
+        o = Conv2DTranspose(n_classes, kernel_size=(4, 4),  strides=(
+            2, 2), use_bias=False, data_format=IMAGE_ORDERING)(o)
+        o2 = f3
+        o2 = (Conv2D(n_classes,  (1, 1), kernel_initializer='he_normal',
+                     data_format=IMAGE_ORDERING))(o2)
+        o2, o = crop(o2, o, img_input)
+        o = Add( name="seg_feats" )([o2, o])
 
-    o = Conv2DTranspose(n_classes, kernel_size=(16, 16),  strides=(
-        8, 8), use_bias=False, data_format=IMAGE_ORDERING)(o)
+        o = Conv2DTranspose(n_classes, kernel_size=(16, 16),  strides=(
+            8, 8), use_bias=False, data_format=IMAGE_ORDERING)(o)
 
-    model = get_segmentation_model(img_input, o)
-    model.model_name = "fcn_8"
-    return model
+        model = get_segmentation_model(img_input, o)
+        model.model_name = "fcn_8"
+    return model,tpu_strategy
 
 
 def fcn_32(n_classes, encoder=vanilla_encoder, input_height=416,
