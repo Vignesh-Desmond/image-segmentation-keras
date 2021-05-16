@@ -210,9 +210,9 @@ def train(model,
 
                  loss_k = weighted_categorical_crossentropy
 
-model.compile(loss=loss_k,
-              optimizer=optimizer_name,
-              metrics=['accuracy'])
+            model.compile(loss=loss_k,
+                            optimizer=optimizer_name,
+                             metrics=['accuracy'])
 
             
     if checkpoints_path is not None:
