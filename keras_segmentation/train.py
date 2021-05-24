@@ -130,6 +130,7 @@ def train(model,
           augmentation_name="aug_all",
           callbacks=None,
           focal=False,
+          default=False,
           custom_augmentation=None,
           other_inputs_paths=None,
           preprocessing=None,
@@ -173,6 +174,9 @@ def train(model,
                 elif dice:
 
                     loss_k = dice_loss
+                
+                elif default:
+                    loss_k ='categorical_crossentropy'
 
                 else:
 
