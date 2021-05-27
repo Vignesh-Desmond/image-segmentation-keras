@@ -219,7 +219,7 @@ def train(model,
                  loss_k = weighted_categorical_crossentropy
 
         opt = keras.optimizers.Adam(learning_rate=lr)   
-        model.compile(loss=loss_k, optimizer=opt, metrics=['accuracy', 'categorical_accuracy', tf.keras.metrics.MeanIoU(num_classes=n_classes)])
+        model.compile(loss=loss_k, optimizer=opt, metrics=['accuracy', 'categorical_accuracy', MeanIoU(num_classes=n_classes,name='mIoU')])
 
             
     if checkpoints_path is not None:
