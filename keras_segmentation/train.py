@@ -6,6 +6,7 @@ from .data_utils.data_loader import image_segmentation_generator, \
 import six
 from keras.callbacks import Callback
 from keras.metrics import MeanIoU
+from keras.optimizers import Adam
 from tensorflow.keras.callbacks import ModelCheckpoint
 import tensorflow as tf
 import glob
@@ -218,7 +219,7 @@ def train(model,
 
                  loss_k = weighted_categorical_crossentropy
 
-        opt = keras.optimizers.Adam(learning_rate=lr)   
+        opt = Adam(learning_rate=lr)   
         model.compile(loss=loss_k, optimizer=opt, metrics=['accuracy', 'categorical_accuracy', MeanIoU(num_classes=n_classes,name='mIoU')])
 
             
