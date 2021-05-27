@@ -5,11 +5,13 @@ from .data_utils.data_loader import image_segmentation_generator, \
     verify_segmentation_dataset
 import six
 from keras.callbacks import Callback
+from keras.metrics import MeanIoU
 from tensorflow.keras.callbacks import ModelCheckpoint
 import tensorflow as tf
 import glob
 import sys
 import keras.backend as K
+
 
 def find_latest_checkpoint(checkpoints_path, fail_safe=True):
 
@@ -186,7 +188,7 @@ def train(model,
             with tpu_strategy.scope():
           
                 opt = keras.optimizers.Adam(learning_rate=lr)
-                model.compile(loss=loss_k, optimizer=opt, metrics=['accuracy', 'categorical_accuracy', tf.keras.metrics.MeanIoU(num_classes=n_classes)])
+                model.compile(loss=loss_k, optimizer=opt, metrics=['accuracy', 'categorical_accuracy', MeanIoU(num_classes=n_classes,name='mIoU')])
 
     else:
         n_classes = model.n_classes
