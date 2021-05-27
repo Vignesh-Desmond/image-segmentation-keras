@@ -126,6 +126,7 @@ def train(model,
           masked=False,
           dice=False,
           optimizer_name='adam',
+          lr=0.001,
           do_augment=False,
           augmentation_name="aug_all",
           callbacks=None,
@@ -184,9 +185,8 @@ def train(model,
         
             with tpu_strategy.scope():
           
-                     model.compile(loss=loss_k,
-                                    optimizer=optimizer_name,
-                                            metrics=['accuracy'])
+                opt = keras.optimizers.Adam(learning_rate=lr)
+                model.compile(loss=loss_k, optimizer=opt, metrics=['accuracy', 'categorical_accuracy', tf.keras.metrics.MeanIoU(num_classes=n_classes)])
 
     else:
         n_classes = model.n_classes
@@ -216,9 +216,8 @@ def train(model,
 
                  loss_k = weighted_categorical_crossentropy
 
-            model.compile(loss=loss_k,
-                            optimizer=optimizer_name,
-                             metrics=['accuracy'])
+         opt = keras.optimizers.Adam(learning_rate=lr)   
+         model.compile(loss=loss_k, optimizer=opt, metrics=['accuracy', 'categorical_accuracy', tf.keras.metrics.MeanIoU(num_classes=n_classes)])
 
             
     if checkpoints_path is not None:
