@@ -59,7 +59,7 @@ def tversky_index(y_true, y_pred):
 
 def focal_tversky(y_true, y_pred):
     pt_1 = tversky_index(y_true, y_pred)
-    gamma = 1.3
+    gamma = 1.0
     return K.pow((1 - pt_1), gamma)
 
 def masked_categorical_crossentropy(gt, pr):
