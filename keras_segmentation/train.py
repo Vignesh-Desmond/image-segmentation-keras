@@ -6,7 +6,8 @@ from .data_utils.data_loader import image_segmentation_generator, \
 import six
 from keras.callbacks import Callback
 from keras.metrics import MeanIoU
-from keras.optimizers import Adam
+from keras.optimizers import Adam, SGD
+from keras.optimizers.schedules import ExponentialDecay
 from tensorflow.keras.callbacks import ModelCheckpoint
 import tensorflow as tf
 import glob
@@ -155,74 +156,43 @@ def train(model,
         else:
             model,tpu_strategy = model_from_name[model](n_classes)
             
-    if want_tpu:
-            n_classes = model.n_classes
-            input_height = model.input_height
-            input_width = model.input_width
-            output_height = model.output_height
-            output_width = model.output_width
+    n_classes = model.n_classes
+    input_height = model.input_height
+    input_width = model.input_width
+    output_height = model.output_height
+    output_width = model.output_width
 
-            if validate:
-                assert val_images is not None
-                assert val_annotations is not None
+    if validate:
+        assert val_images is not None
+        assert val_annotations is not None
 
-            if optimizer_name is not None:
+    if optimizer_name is not None:
 
-                if focal:
-                    loss_k = focal_tversky
+        if focal:
+            loss_k = focal_tversky
 
-                elif masked:
+        elif masked:
 
-                    loss_k = masked_categorical_crossentropy
+            loss_k = masked_categorical_crossentropy
 
-                elif dice:
+        elif dice:
 
-                    loss_k = dice_loss
-                
-                elif default:
-                    loss_k ='categorical_crossentropy'
+             loss_k = dice_loss
 
-                else:
+        else:
 
-                    loss_k = weighted_categorical_crossentropy
-        
-            with tpu_strategy.scope():
-          
-                opt = keras.optimizers.Adam(learning_rate=lr)
-                model.compile(loss=loss_k, optimizer=opt, metrics=['accuracy', 'categorical_accuracy', MeanIoU(num_classes=n_classes,name='mIoU')])
+             loss_k = weighted_categorical_crossentropy
 
-    else:
-        n_classes = model.n_classes
-        input_height = model.input_height
-        input_width = model.input_width
-        output_height = model.output_height
-        output_width = model.output_width
+    if optimizer_name == 'adam':
+        opt = Adam(learning_rate=lr)
+    if optimizer_name == 'sgd':
+        lr_schedule = ExponentialDecay(
+            initial_learning_rate=1e-2,
+            decay_steps=10000,
+            decay_rate=0.9)
+        opt = SGD(learning_rate=lr_schedule)
+    model.compile(loss=loss_k, optimizer=opt, metrics=['accuracy', MeanIoU(num_classes=n_classes,name='mIoU')])
 
-        if validate:
-            assert val_images is not None
-            assert val_annotations is not None
-
-        if optimizer_name is not None:
-
-            if focal:
-                loss_k = focal_tversky
-    
-            elif masked:
-
-                loss_k = masked_categorical_crossentropy
-
-            elif dice:
-
-                 loss_k = dice_loss
-
-            else:
-
-                 loss_k = weighted_categorical_crossentropy
-
-        opt = Adam(learning_rate=lr)   
-        model.compile(loss=loss_k, optimizer=opt, metrics=['accuracy', 'categorical_accuracy', MeanIoU(num_classes=n_classes,name='mIoU')])
-
-            
     if checkpoints_path is not None:
         config_file = checkpoints_path + "_config.json"
         dir_name = os.path.dirname(config_file)
